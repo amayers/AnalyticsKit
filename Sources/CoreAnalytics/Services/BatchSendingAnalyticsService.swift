@@ -52,6 +52,7 @@ public class BatchSendingAnalyticsService {
     /// Sending these events failed, so add them back to the queue, and send them again later.
     final func sendingFailed<Events: Collection>(for events: Events) where Events.Element == SendingDelayedAnalyticsEvent {
         self.queuedEvents.append(contentsOf: events)
+        print("Sending \(events.count) analytics events failed")
     }
 
     private func sendBatchOfEvents() {
@@ -64,6 +65,7 @@ public class BatchSendingAnalyticsService {
                 queuedEvents.remove(at: index)
             }
         }
+        print("Attempting to send \(events.count) analytics events")
         send(events: events)
     }
 
