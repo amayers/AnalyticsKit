@@ -30,13 +30,19 @@ public final class MixPanelAnalyticsService: BatchSendingAnalyticsService {
                 let task = self.session.dataTask(with: request, completionHandler: { (responseData, _, error) in
                     self.sending(events: events, finishedWith: responseData, error: error)
                 })
-                // By only commenting out the single line below, we limit the chance that we change something and it breaks the compile for release builds.
-                // I know because I just found it broken because I had changed how the atomic type works, and it didn't throw a compile error during that PR.
-                #if !DEBUG
+                
+                #if DEBUG
+                if ProcessInfo.processInfo.environment["SEND_ANALYTICS_ON_DEBUG"] == "true" {
                     task.resume()
-                #else
+                } else {
+                    print("Pretending to send \(events.count) to Mixpanel.")
+                    print("Not actually sending because this is a DEBUG build.")
+                    print("To override this set the environment variable SEND_ANALYTICS_ON_DEBUG=true")
                     // Clear out the events, as if they had been actually sent to MixPanel.
                     self.sending(events: events, finishedWith: nil, error: nil)
+                }
+                #else
+                task.resume()
                 #endif
 
             } catch {
