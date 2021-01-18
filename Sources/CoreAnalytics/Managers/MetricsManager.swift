@@ -6,7 +6,7 @@ import UIKit
 /// On 13 we get the ability to view production data in Xcode from customer's devices.
 public final class MetricsManager: NSObject {
 
-    override init() {
+    public override init() {
         super.init()
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillTerminate(_:)),
                                                name: UIApplication.willTerminateNotification, object: nil)
