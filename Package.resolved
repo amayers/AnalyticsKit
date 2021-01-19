@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "ThreadKit",
+        "repositoryURL": "https://github.com/amayers/ThreadKit.git",
+        "state": {
+          "branch": null,
+          "revision": "3e9a602b18c552107493aa7fff41090fe9550039",
+          "version": "1.0.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,3 +1,4 @@
+import ThreadKit
 import UIKit
 
 /// Base class for an analytics service that batches up events and sends them once certain conditions have been met.
