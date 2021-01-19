@@ -1,4 +1,4 @@
-import CoreAnalytics
+import AnalyticsKit
 
 class MockEvent: AnalyticsEvent {
     let name: String = "mock"

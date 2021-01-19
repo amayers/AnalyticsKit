@@ -1,4 +1,4 @@
-@testable import CoreAnalytics
+@testable import AnalyticsKit
 import XCTest
 
 final class BatchSendingAnalyticsServiceTests: XCTestCase {

@@ -1,4 +1,4 @@
-import CoreAnalytics
+import AnalyticsKit
 import XCTest
 
 class BytesTests: XCTestCase {
