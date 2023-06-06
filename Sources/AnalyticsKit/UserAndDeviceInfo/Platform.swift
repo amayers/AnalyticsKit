@@ -6,22 +6,6 @@ import Metal
 public enum Platform {
     public static var isSimulator: Bool { return TARGET_OS_SIMULATOR != 0 }
 
-    /// Does the current iOS device's GPU support Metal.
-    public static var isMetalSupported: Bool {
-        /// If an iOS device has absolutely no Metal support then the `MTLCreateSystemDefaultDevice()` will return nil.
-        if let device = MTLCreateSystemDefaultDevice() {
-            // The first GPU family is A7 devices, that have such limited Metal support that basically nothing Metal works on them.
-            // So we will pretend that they don't support Metal at all. Infact most of Apple's docs say that the Metal support is only on >= A8
-            #if targetEnvironment(macCatalyst)
-            return true
-            #else
-            return device.supportsFeatureSet(.iOS_GPUFamily2_v1)
-            #endif
-        }
-
-        return false
-    }
-
     /// Returns true if the code is running as part of a unit/integration test
     public static var isRunningTests: Bool {
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil ||

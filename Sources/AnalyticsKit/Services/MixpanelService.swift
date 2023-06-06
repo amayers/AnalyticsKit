@@ -1,81 +1,82 @@
+//
+
 import Foundation
-import UIKit
 
-/// Sends analytics to MixPanel
-public final class MixPanelAnalyticsService: BatchSendingAnalyticsService {
-
-    /// Create the analytics service
-    /// - Parameter token: The MixPanel token for the app that you want all analytics events sent to.
-    public init(token: String) {
-        self.token = token
-
-        super.init(sendBatchSize: 50)
+public final class MixpanelService: Service {
+    
+    enum Error: Swift.Error {
+        case mixpanelResponseFailure
     }
-
-    override func send<Events: Collection>(events: Events) where Events.Element == SendingDelayedAnalyticsEvent {
-        DispatchQueue.global(qos: .utility).async {
-            let mixPanelEvents = events.map { MixPanelEvent(analyticsEvent: $0, token: self.token, distinctID: self.userID?.uuidString)}
-
-            let jsonEncoder = JSONEncoder()
-            jsonEncoder.dateEncodingStrategy = .secondsSince1970
-            do {
-                let jsonData = try jsonEncoder.encode(mixPanelEvents)
-                let jsonString = jsonData.base64EncodedString()
-                let bodyString = "data=\(jsonString)"
-
-                var request = URLRequest(url: self.url())
-                request.addValue(Constants.contentType, forHTTPHeaderField: "Content-Type")
-                request.httpBody = bodyString.data(using: .utf8)
-                request.httpMethod = Constants.httpMethod
-                let task = self.session.dataTask(with: request, completionHandler: { (responseData, _, error) in
-                    self.sending(events: events, finishedWith: responseData, error: error)
-                })
-                
-                #if DEBUG
-                if ProcessInfo.processInfo.environment["SEND_ANALYTICS_ON_DEBUG"] == "true" {
-                    task.resume()
-                } else {
-                    print("Pretending to send \(events.count) to Mixpanel.")
-                    print("Not actually sending because this is a DEBUG build.")
-                    print("To override this set the environment variable SEND_ANALYTICS_ON_DEBUG=true")
-                    // Clear out the events, as if they had been actually sent to MixPanel.
-                    self.sending(events: events, finishedWith: nil, error: nil)
-                }
-                #else
-                task.resume()
-                #endif
-
-            } catch {
-                assertionFailure("Error encoding JSON: \(error)")
-                self.sendingFailed(for: events)
-            }
-        }
-    }
-
-    // MARK: - Private
-
+    
     private enum Constants {
         static let host = "api.mixpanel.com"
         static let eventEndpoint = "/track"
         static let scheme = "https"
         static let contentType = "application/x-www-form-urlencoded"
         static let httpMethod = "POST"
+        static let batchSize = 50
     }
-
+    
+    // MARK: - Private Properties
+    
+    private let session: URLSession
     private let token: String
-    private let session = URLSession.shared
+    
+    // MARK: - Public Properties
+    
+    public let batchSize: Int = Constants.batchSize
+    
+    
+    // MARK: - Life Cycle
 
-    private func sending<Events: Collection>(events: Events,
-                                             finishedWith data: Data?, error: Error?) where Events.Element == SendingDelayedAnalyticsEvent {
-        if let error = error {
-            assertionFailure("Error logging analytics: \(error)")
-            sendingFailed(for: events)
-        } else if let data = data, let responseString = String(data: data, encoding: .utf8), responseString != "1" {
-            assertionFailure("Error logging analytics: \(responseString)")
-            sendingFailed(for: events)
+    /// Create the analytics service
+    /// - Parameter token: The MixPanel token for the app that you want all analytics events sent to.
+    public init(token: String, session: URLSession = .shared) {
+        self.token = token
+        self.session = session
+    }
+    
+    // MARK: - Public Methods
+    
+    public func send<Events>(
+        events: Events,
+        for userID: UUID
+    ) async throws where Events : Collection, Events.Element == SendingDelayedAnalyticsEvent {
+        let mixPanelEvents = events.map {
+            MixPanelEvent(analyticsEvent: $0, token: token, distinctID: userID.uuidString)
+        }
+
+        let jsonEncoder = JSONEncoder()
+        jsonEncoder.dateEncodingStrategy = .secondsSince1970
+        
+        let jsonData = try jsonEncoder.encode(mixPanelEvents)
+        let jsonString = jsonData.base64EncodedString()
+        let bodyString = "data=\(jsonString)"
+
+        var request = URLRequest(url: self.url())
+        request.addValue(Constants.contentType, forHTTPHeaderField: "Content-Type")
+        request.httpBody = bodyString.data(using: .utf8)
+        request.httpMethod = Constants.httpMethod
+        
+#if DEBUG
+        if ProcessInfo.processInfo.environment["SEND_ANALYTICS_ON_DEBUG"] != "true" {
+            print("Pretending to send \(events.count) to Mixpanel.")
+            print("Not actually sending because this is a DEBUG build.")
+            print("To override this set the environment variable SEND_ANALYTICS_ON_DEBUG=true")
+            return
+        }
+#endif
+        
+        let (data, _) = try await session.data(for: request)
+        if let responseString = String(data: data, encoding: .utf8), responseString == "1" {
+            print("Sent \(events.count) events successfully to Mixpanel.")
+        } else {
+            throw Error.mixpanelResponseFailure
         }
     }
-
+    
+    // MARK: - Private Methods
+    
     private func url() -> URL {
         var components = URLComponents()
         components.host = Constants.host
@@ -84,6 +85,8 @@ public final class MixPanelAnalyticsService: BatchSendingAnalyticsService {
         return components.url!
     }
 }
+
+// MARK: -
 
 private struct MixPanelEvent: Encodable {
     let analyticsEvent: SendingDelayedAnalyticsEvent

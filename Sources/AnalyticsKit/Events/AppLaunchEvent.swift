@@ -13,8 +13,8 @@ public struct AppLaunchEvent: AnalyticsEvent {
             "device_description": self.device.device.model.rawValue,
             "ram_size_mb": self.device.ramSizeMB,
             "free_disk_space_mb": self.device.freeDiskSpaceMB,
-            "language_code": Locale.current.languageCode ?? "unknown",
-            "region_code": Locale.current.regionCode ?? "unknown",
+            "language_code": Locale.current.language.languageCode?.identifier ?? "unknown",
+            "region_code": Locale.current.region?.identifier ?? "unknown",
             "locale_identifier": Locale.current.identifier
         ]
     }
