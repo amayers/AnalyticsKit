@@ -22,17 +22,6 @@ public struct AppLaunchEvent: AnalyticsEvent {
     public init() {
         self.app = AppInfo()
         self.device = DeviceInfo()
-
-        print("""
-            App launched
-            version: \(app.version) (\(app.build)),
-            iOS: \(device.osVersion),
-            device model code: \(device.device.modelCode),
-            device description: \(device.device.model.rawValue),
-            user id: \(app.userIdentifier),
-            RAM: \(device.ramSizeMB) MB,
-            free disk space: \(device.freeDiskSpaceMB) MB
-            """)
     }
 
     public func wasSent() { }

@@ -1,3 +1,4 @@
+import OSLog
 import UIKit
 
 extension UIDevice {
@@ -11,7 +12,8 @@ extension UIDevice {
                 return Bytes(freeSpace)
             }
         } catch {
-            print("Error trying to get the amount of free disk space: \(error)")
+            let logger = Logger.analyticsLogger(category: String(describing: Self.self))
+            logger.error("Error trying to get the amount of free disk space: \(error)")
         }
         return nil
     }

@@ -1,6 +1,5 @@
-//
-
 import Foundation
+import OSLog
 
 public final class MixpanelService: Service {
     
@@ -19,6 +18,7 @@ public final class MixpanelService: Service {
     
     // MARK: - Private Properties
     
+    private let logger: Logger
     private let session: URLSession
     private let token: String
     
@@ -32,6 +32,7 @@ public final class MixpanelService: Service {
     /// Create the analytics service
     /// - Parameter token: The MixPanel token for the app that you want all analytics events sent to.
     public init(token: String, session: URLSession = .shared) {
+        self.logger = Logger.analyticsLogger(category: String(describing: Self.self))
         self.token = token
         self.session = session
     }
@@ -60,16 +61,20 @@ public final class MixpanelService: Service {
         
 #if DEBUG
         if ProcessInfo.processInfo.environment["SEND_ANALYTICS_ON_DEBUG"] != "true" {
-            print("Pretending to send \(events.count) to Mixpanel.")
-            print("Not actually sending because this is a DEBUG build.")
-            print("To override this set the environment variable SEND_ANALYTICS_ON_DEBUG=true")
+            logger.debug(
+                """
+                Pretending to send \(events.count) to Mixpanel.
+                Not actually sending because this is a DEBUG build.
+                To override this set the environment variable SEND_ANALYTICS_ON_DEBUG=true
+                """
+            )
             return
         }
 #endif
         
         let (data, _) = try await session.data(for: request)
         if let responseString = String(data: data, encoding: .utf8), responseString == "1" {
-            print("Sent \(events.count) events successfully to Mixpanel.")
+            logger.info("Sent \(events.count) events successfully to Mixpanel.")
         } else {
             throw Error.mixpanelResponseFailure
         }
