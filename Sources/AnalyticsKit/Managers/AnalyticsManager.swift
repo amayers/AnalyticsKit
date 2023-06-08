@@ -1,7 +1,7 @@
 import OSLog
 import UIKit
 
-public final class AnalyticsManager {
+public final class AnalyticsManager: AnalyticsManaging {
     private enum Constants {
         static let hasUserApprovedAnalyticsKey = "AnalyticsManager_hasUserApprovedAnalytics"
     }
@@ -61,13 +61,6 @@ public final class AnalyticsManager {
                 name: UIApplication.willTerminateNotification,
                 object: nil
             )
-        }
-    }
-    
-    /// Logs an event on all enabled services. Does not wait for the event to be sent.
-    public func logCustomEvent(_ event: AnalyticsEvent) {
-        Task {
-            await logCustomEvent(event)
         }
     }
     
