@@ -131,9 +131,11 @@ private struct MixPanelEvent: Encodable {
         try propertiesContainer.encode(self.token, forKey: AttributesCodingKey(stringValue: "token")!)
         try propertiesContainer.encode(self.analyticsEvent.timeEventOccurred, forKey: AttributesCodingKey(stringValue: "time")!)
         try propertiesContainer.encodeIfPresent(self.distinctID, forKey: AttributesCodingKey(stringValue: "distinct_id")!)
-        if let customProperties = self.analyticsEvent.event.attributes {
-            try customProperties.forEach { (key, value) in
+        
+        let encodeProperties: ([String: Any]) throws -> Void = { properties in
+            try properties.forEach { (key, value) in
                 let codingKey = AttributesCodingKey(stringValue: key)!
+                
                 if let intValue = value as? Int {
                     try propertiesContainer.encode(intValue, forKey: codingKey)
                 } else if let doubleValue = value as? Double {
@@ -143,9 +145,16 @@ private struct MixPanelEvent: Encodable {
                 } else if let boolValue = value as? Bool {
                     try propertiesContainer.encode(boolValue, forKey: codingKey)
                 } else {
-                    assertionFailure("Encountered a custom analytics parameter that isn't an Int, Double, Bool or String")
+                    assertionFailure("Encountered a custom analytics parameter \(key) that isn't an Int, Double, Bool or String")
                 }
             }
+        }
+        
+        if let customProperties = self.analyticsEvent.event.attributes {
+            try encodeProperties(customProperties)
+        }
+        if analyticsEvent.event.shouldSendStandardAttributes {
+            try encodeProperties(analyticsEvent.event.standardAttributes)
         }
     }
 }
