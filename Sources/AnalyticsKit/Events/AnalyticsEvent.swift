@@ -11,7 +11,7 @@ public protocol AnalyticsEvent {
 
     /// Key value pairs of attributes for this event. The values' types are limited based on the analytics service(s) you will use them with.
     /// For example `MixpanelAnalyticsService` supports `String`, `Int`, `Double`, `Bool`.
-    var attributes: [String: Any]? { get }
+    var attributes: [String: AnalyticsEventAttribute]? { get }
     
     /// Should the `standardAttributes` (device model, app & OS versions) be sent in addition to the `attributes`? Defaults to `true`
     var shouldSendStandardAttributes: Bool { get }

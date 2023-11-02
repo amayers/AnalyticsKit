@@ -4,7 +4,7 @@ import Foundation
 public struct AppLaunchEvent: AnalyticsEvent {
     public let name = "app_launch"
 
-    public let attributes: [String: Any]? = nil
+    public let attributes: [String: AnalyticsEventAttribute]? = nil
 
     public init() { }
 
