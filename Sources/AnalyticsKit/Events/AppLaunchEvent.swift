@@ -4,9 +4,13 @@ import Foundation
 public struct AppLaunchEvent: AnalyticsEvent {
     public let name = "app_launch"
 
-    public let attributes: [String: AnalyticsEventAttribute]? = nil
+    public let attributes: [String: AnalyticsEventAttribute]?
 
-    public init() { }
+    /// - Parameter attributes: By default a bunch of standard device & app attributes will be sent. If you have
+    /// any additional attributes, add them here.
+    public init(attributes: [String: AnalyticsEventAttribute] = [:]) {
+        self.attributes = attributes
+    }
 
     public func wasSent() { }
 }
