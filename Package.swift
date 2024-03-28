@@ -7,19 +7,20 @@ let package = Package(
     name: "AnalyticsKit",
     platforms: [.iOS(.v16)],
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "AnalyticsKit",
-            targets: ["AnalyticsKit"]),
+            targets: ["AnalyticsKit"]
+        ),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "AnalyticsKit",
-            dependencies: []),
+            dependencies: [],
+            resources: [.process("Resources")]
+        ),
         .testTarget(
             name: "AnalyticsKitTests",
-            dependencies: ["AnalyticsKit"]),
+            dependencies: ["AnalyticsKit"]
+        ),
     ]
 )
