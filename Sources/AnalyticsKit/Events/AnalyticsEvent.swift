@@ -35,7 +35,6 @@ public extension AnalyticsEvent {
             "app_version": appInfo.version,
             "app_build": appInfo.build,
             "device_model": deviceInfo.deviceModelIdentifier,
-            "ram_size_mb": deviceInfo.ramSizeMB,
             "language_code": locale.language.languageCode?.identifier ?? "unknown",
             "region_code": locale.region?.identifier ?? "unknown",
             "locale_identifier": locale.identifier

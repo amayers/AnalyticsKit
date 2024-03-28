@@ -27,35 +27,4 @@ public enum Platform {
         }
         return modelIdentifier
     }()
-
-    /// How much total RAM does this device have.
-    public static var deviceRAM: Bytes = {
-        return ProcessInfo.processInfo.physicalMemory
-    }()
-
-    public struct Memory {
-        public let used: Bytes
-        public let free: Bytes
-    }
-
-    public static var deviceMemoryDetails: Memory {
-        var pageSize: vm_size_t = 0
-
-        let hostPort: mach_port_t = mach_host_self()
-        var hostSize: mach_msg_type_number_t = mach_msg_type_number_t(MemoryLayout<vm_statistics_data_t>.stride / MemoryLayout<integer_t>.stride)
-        host_page_size(hostPort, &pageSize)
-
-        var vmStat: vm_statistics = vm_statistics_data_t()
-        withUnsafeMutablePointer(to: &vmStat) { (vmStatPointer) -> Void in
-            vmStatPointer.withMemoryRebound(to: integer_t.self, capacity: Int(hostSize)) {
-                if host_statistics(hostPort, HOST_VM_INFO, $0, &hostSize) != KERN_SUCCESS {
-                    NSLog("Error: Failed to fetch vm statistics")
-                }
-            }
-        }
-
-        let used = Bytes(vmStat.active_count + vmStat.inactive_count + vmStat.wire_count) * Bytes(pageSize)
-        let free = Bytes(vmStat.free_count) * Bytes(pageSize)
-        return Memory(used: used, free: free)
-    }
 }
