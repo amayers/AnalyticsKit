@@ -1,38 +1,19 @@
 import OSLog
 import UIKit
 
-public final class AnalyticsManager: AnalyticsManaging {
-    private enum Constants {
-        static let hasUserApprovedAnalyticsKey = "AnalyticsManager_hasUserApprovedAnalytics"
-    }
-    
+public actor AnalyticsManager: AnalyticsManaging {
     private let logger: Logger
     private let service: Service
-    private let userDefaults: UserDefaults
     
     private let queue: EventQueue
-    
-    public var hasUserApprovedAnalytics: Bool {
-        didSet {
-            userDefaults.set(
-                hasUserApprovedAnalytics,
-                forKey: Constants.hasUserApprovedAnalyticsKey
-            )
-        }
-    }
 
     public init(
         service: Service,
-        queue: EventQueue = .init(),
-        userDefaults: UserDefaults = .standard
+        queue: EventQueue = .init()
     ) {
         self.logger = Logger.analyticsLogger(category: String(describing: Self.self))
         self.service = service
         self.queue = queue
-        self.userDefaults = userDefaults
-        // This sets the default of `hasUserApprovedAnalytics` to `true`, but once a user toggles the setting manually, this value is overwritten.
-        userDefaults.register(defaults: [Constants.hasUserApprovedAnalyticsKey: true])
-        hasUserApprovedAnalytics = userDefaults.bool(forKey: Constants.hasUserApprovedAnalyticsKey)
         
         Task { @MainActor in
             // The following app events should all trigger sending any queued events, since after these events our app might stop running,

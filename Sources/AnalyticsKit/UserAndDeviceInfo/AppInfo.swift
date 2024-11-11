@@ -6,6 +6,7 @@ public struct AppInfo {
     public let build: String
     public let userIdentifier: String
 
+    @MainActor
     public init() {
         self.userIdentifier = UserIdentifier.identifierForVendor().uuidString
         if let dictionary = Bundle.main.infoDictionary,

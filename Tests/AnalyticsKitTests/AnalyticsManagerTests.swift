@@ -3,28 +3,6 @@ import XCTest
 
 final class AnalyticsManagerTests: XCTestCase {
     
-    private let userDefaults = UserDefaults(suiteName: "AnalyticsManagerTests")!
-    private let key = "AnalyticsManager_hasUserApprovedAnalytics"
-    
-    override func tearDown() {
-        super.tearDown()
-        userDefaults.removeObject(forKey: key)
-    }
-
-    func test_hasUserApprovedAnalytics() async throws {
-        XCTAssertNil(userDefaults.object(forKey: key))
-        
-        let manager = AnalyticsManager(
-            service: TestService(),
-            userDefaults: userDefaults
-        )
-        XCTAssertTrue(manager.hasUserApprovedAnalytics)
-        XCTAssertEqual(manager.hasUserApprovedAnalytics, userDefaults.bool(forKey: key))
-        manager.hasUserApprovedAnalytics = false
-        XCTAssertFalse(manager.hasUserApprovedAnalytics)
-        XCTAssertEqual(manager.hasUserApprovedAnalytics, userDefaults.bool(forKey: key))
-    }
-    
     func test_logCustomEvent_addsToQueue_doesNotSend() async throws {
         let service = TestService { _, _, _ in
             XCTFail("The service shouldn't get the event yet")
@@ -32,8 +10,7 @@ final class AnalyticsManagerTests: XCTestCase {
         let queue = EventQueue()
         let manager = AnalyticsManager(
             service: service,
-            queue: queue,
-            userDefaults: userDefaults
+            queue: queue
         )
         
         let event = MockEvent()
@@ -55,8 +32,7 @@ final class AnalyticsManagerTests: XCTestCase {
         let queue = EventQueue()
         let manager = AnalyticsManager(
             service: service,
-            queue: queue,
-            userDefaults: userDefaults
+            queue: queue
         )
 
         let preLogEvents = await queue.events
@@ -72,7 +48,7 @@ final class AnalyticsManagerTests: XCTestCase {
 
 // MARK: -
 
-private class TestService: Service {
+private class TestService: Service, @unchecked Sendable {
     let sendCalled: (([SendingDelayedAnalyticsEvent], UUID, TestService) -> Void)?
     let batchSize: Int
 

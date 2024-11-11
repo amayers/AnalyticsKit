@@ -1,7 +1,7 @@
 import Foundation
 
 /// Used to limit attributes to ones supported by the manager.
-public protocol AnalyticsEventAttribute {
+public protocol AnalyticsEventAttribute: Sendable {
     
 }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol Service {
+public protocol Service: Sendable {
     /// How many items the service can send at a time.
     var batchSize: Int { get }
 

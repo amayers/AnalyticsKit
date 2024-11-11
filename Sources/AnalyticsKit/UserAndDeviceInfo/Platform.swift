@@ -17,7 +17,7 @@ public enum Platform {
     }
 
     /// Identifier such as `iPhone4,1` to identify a specific model.
-    public static var modelIdentifier: String = {
+    public static let modelIdentifier: String = {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)

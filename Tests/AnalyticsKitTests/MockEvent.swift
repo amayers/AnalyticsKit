@@ -1,6 +1,6 @@
 import AnalyticsKit
 
-class MockEvent: AnalyticsEvent {
+final class MockEvent: AnalyticsEvent, @unchecked Sendable {
     let name: String = "mock"
     
     let attributes: [String : AnalyticsEventAttribute]? = ["key1": 1, "key2": "two"]

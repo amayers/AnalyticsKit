@@ -43,8 +43,8 @@ public final class MixpanelService: Service {
         events: Events,
         for userID: UUID
     ) async throws where Events : Collection, Events.Element == SendingDelayedAnalyticsEvent {
-        let mixPanelEvents = events.map {
-            MixPanelEvent(analyticsEvent: $0, token: token, distinctID: userID.uuidString)
+        let mixPanelEvents = await events.asyncMap {
+            await MixPanelEvent(analyticsEvent: $0, token: token, distinctID: userID.uuidString)
         }
 
         let jsonEncoder = JSONEncoder()
@@ -93,18 +93,22 @@ public final class MixpanelService: Service {
 
 // MARK: -
 
-private struct MixPanelEvent: Encodable {
+private struct MixPanelEvent: Encodable, Sendable {
     let analyticsEvent: SendingDelayedAnalyticsEvent
 
     /// Mixpanel's token that links the iOS consumer app with it's Mixpanel app record
     private let token: String
     /// An ID for this user so we can track their actions before/after this event as a flow
     private let distinctID: String?
+    
+    private let standardAttributes: [String: Sendable]
 
+    @MainActor
     init(analyticsEvent: SendingDelayedAnalyticsEvent, token: String, distinctID: String?) {
         self.analyticsEvent = analyticsEvent
         self.token = token
         self.distinctID = distinctID
+        self.standardAttributes = analyticsEvent.event.standardAttributes
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -154,7 +158,7 @@ private struct MixPanelEvent: Encodable {
             try encodeProperties(customProperties)
         }
         if analyticsEvent.event.shouldSendStandardAttributes {
-            try encodeProperties(analyticsEvent.event.standardAttributes)
+            try encodeProperties(standardAttributes)
         }
     }
 }

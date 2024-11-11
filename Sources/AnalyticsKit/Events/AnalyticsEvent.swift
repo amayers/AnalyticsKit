@@ -4,7 +4,7 @@ import Foundation
 /// If you are creating an event for the user changing app settings, you would probably want to do something like the following:
 /// `name = "settings_changed"`
 /// `attributes = ["use_metric_units" : settings.useMetric, "sound_effects_enabled" : settings.soundEnabled]`
-public protocol AnalyticsEvent {
+public protocol AnalyticsEvent: Sendable {
     /// The name that will be shown in your analytics service for this event.
     /// You should keep this name fixed, and not change its values all the time.
     var name: String { get }
@@ -26,7 +26,8 @@ public extension AnalyticsEvent {
     var shouldSendStandardAttributes: Bool { true }
     
     /// Things like OS version, app version, device model that should be attached to every type of analytics event.
-    var standardAttributes: [String: Any] {
+    @MainActor
+    var standardAttributes: [String: Sendable] {
         let appInfo = AppInfo()
         let deviceInfo = DeviceInfo()
         let locale = Locale.current
