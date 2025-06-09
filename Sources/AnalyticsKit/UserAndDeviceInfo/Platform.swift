@@ -4,7 +4,13 @@ import Metal
 /// Information about the current platform that the app is running on.
 /// Is it a simulator, or device. Which device?
 public enum Platform {
-    public static var isSimulator: Bool { return TARGET_OS_SIMULATOR != 0 }
+    public static var isSimulator: Bool {
+#if targetEnvironment(simulator)
+        true
+#else
+        false
+#endif
+    }
 
     /// Returns true if the code is running as part of a unit/integration test
     public static var isRunningTests: Bool {
